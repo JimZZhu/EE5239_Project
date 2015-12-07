@@ -17,6 +17,7 @@
 %     input: [4xN double]
 %        dt: 0.0050
 function result = simulate(controller, tstart, tend, dt)
+    addpath ./robotics3D/
     % Physical constants.
     g = 9.81;
     m = 0.5;
@@ -124,6 +125,8 @@ function result = simulate(controller, tstart, tend, dt)
         theta = theta + dt * thetadot;
         xdot = xdot + dt * a;
         x = x + dt * xdot;
+        
+        
         % update the quaternion
         R_current = rotation(theta); % L to G
         q_current = rot2quat(R_current'); % G to L 
