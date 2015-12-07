@@ -1,0 +1,17 @@
+function [ control ] = Fixed_input(num, scale)
+
+load(['4SystemID_' num2str( num ) '.mat']);
+
+msize = size(inputout,2);
+
+control = zeros(4,scale*(msize-1) + 1);
+
+for i = 1:msize
+   control(1,i:i+scale-1) = inputout(1,i)*ones(1,scale); 
+   control(2,i:i+scale-1) = inputout(2,i)*ones(1,scale); 
+   control(3,i:i+scale-1) = inputout(3,i)*ones(1,scale); 
+   control(4,i:i+scale-1) = inputout(4,i)*ones(1,scale); 
+end
+
+end
+

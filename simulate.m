@@ -51,13 +51,15 @@ function result = simulate(controller, tstart, tend, dt)
     
     % step input
     thetadot_norm = zeros(3,N);
-    pulse_width = 100; % time_step
     pulse_interval = ceil(N/5);
+    pulse_width = ceil(pulse_interval/5); % time_step
     pulse_magnitude = 0.5;
     thetadot_norm(1,1:pulse_width) = pulse_magnitude*ones(1,pulse_width);
     thetadot_norm(2,1+pulse_interval:pulse_width+pulse_interval) = pulse_magnitude*ones(1,pulse_width);
     thetadot_norm(1,1+2*pulse_interval:pulse_width+2*pulse_interval) = -pulse_magnitude*ones(1,pulse_width);
     thetadot_norm(2,1+3*pulse_interval:pulse_width+3*pulse_interval) = -pulse_magnitude*ones(1,pulse_width);
+    
+%     thetadot_norm(3,1+2*pulse_interval:pulse_width+2*pulse_interval) = -pulse_magnitude*ones(1,pulse_width);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % Output values, recorded as the simulation runs.
@@ -86,7 +88,7 @@ function result = simulate(controller, tstart, tend, dt)
     else
         % With a control, give a random deviation in the angular velocity.
         % Deviation is in degrees/sec.
-        deviation = 50;
+        deviation = 0;
         thetadot = deg2rad(2 * deviation * rand(3, 1) - deviation);
         
         %%%%%%%%% My implementation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -111,6 +113,7 @@ function result = simulate(controller, tstart, tend, dt)
             i = input(t);
         else
             [i, controller_params] = controller(controller_params, thetadot, thetadot_norm(:,ind), theta);
+%             i = mcontrol(:,ind);
         end
 
         % Compute forces, torques, and accelerations.
@@ -150,9 +153,10 @@ function result = simulate(controller, tstart, tend, dt)
                     'angvel', thetadotout, 't', ts, 'dt', dt, 'input', inputout);
                 
     %%%%%%%%%%%%%%%% Output state x and measurement z %%%%%%%%%%%%%%%%%%%%%
-    real_state = [xout;v_local;omegaout;qout];
+    real_state = [xout;v_local;omegaout;qout;thetaout];
     observ = [xout_meas;accelout_meas;omegaout_meas;qout_meas];
-    save('4SystemID.mat', 'real_state', 'observ', 'inputout');
+    real_parameters = [I(1,1) I(2,2) I(3,3) I(1,2) I(1,3) I(2,3) k*L b]';
+    save('4SystemID_1.mat', 'real_state', 'observ', 'inputout','real_parameters');
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     figure()
@@ -196,7 +200,7 @@ end
 %   k: thrust coefficient
 %   kd: global drag coefficient
 function a = acceleration(inputs, angles, vels, m, g, k, kd)
-    gravity = [0; 0; -g];
+    gravity = [0; 0; -g + 0*randn()];
     R = rotation(angles);
     T = R * thrust(inputs, k);
     Fd = -kd * vels;
