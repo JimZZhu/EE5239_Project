@@ -1,3 +1,4 @@
+% Function to get the matrix L (L*para = 0)
 function [ L ] = Initialize_I( omega, dt, u, scale )
 addpath ('./robotics3D');
 
@@ -13,7 +14,7 @@ for i = 2:N
    [ L_1_temp ] = L_matrix( omega(:,i) - omega(:,i-1) );
    [ L_2_temp ] = L_matrix( omega(:,i) );
    [ Lk ] = ControlMatrix( u(:,i) );
-   L((i-2)*3 + 1:(i-1)*3,:) = [L_1_temp + dt*skewsymm(omega(:,i))*L_2_temp -dt*Lk];   
+   L((i-2)*3 + 1:(i-1)*3,:) = [L_1_temp + dt*skewsymm(omega(:,i))*L_2_temp -dt*Lk*1e-4];   
 end
 
 end

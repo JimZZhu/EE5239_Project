@@ -51,15 +51,18 @@ function result = simulate(controller, tstart, tend, dt)
     
     % step input
     thetadot_norm = zeros(3,N);
-    pulse_interval = ceil(N/5);
-    pulse_width = ceil(pulse_interval/5); % time_step
+    pulse_interval = ceil(N/7);
+    pulse_width = ceil(pulse_interval/2); % time_step
     pulse_magnitude = 0.5;
     thetadot_norm(1,1:pulse_width) = pulse_magnitude*ones(1,pulse_width);
     thetadot_norm(2,1+pulse_interval:pulse_width+pulse_interval) = pulse_magnitude*ones(1,pulse_width);
     thetadot_norm(1,1+2*pulse_interval:pulse_width+2*pulse_interval) = -pulse_magnitude*ones(1,pulse_width);
     thetadot_norm(2,1+3*pulse_interval:pulse_width+3*pulse_interval) = -pulse_magnitude*ones(1,pulse_width);
     
-%     thetadot_norm(3,1+2*pulse_interval:pulse_width+2*pulse_interval) = -pulse_magnitude*ones(1,pulse_width);
+    % yaw waypoint
+    thetadot_norm(3,1+4*pulse_interval:pulse_width+4*pulse_interval) = 0.5*pulse_magnitude*ones(1,pulse_width);
+    thetadot_norm(3,1+5*pulse_interval:pulse_width+5*pulse_interval) = -0.5*pulse_magnitude*ones(1,pulse_width);
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % Output values, recorded as the simulation runs.
@@ -113,7 +116,7 @@ function result = simulate(controller, tstart, tend, dt)
             i = input(t);
         else
             [i, controller_params] = controller(controller_params, thetadot, thetadot_norm(:,ind), theta);
-%             i = mcontrol(:,ind);
+%             i = mcontrol(:,ind); % fixed control input
         end
 
         % Compute forces, torques, and accelerations.

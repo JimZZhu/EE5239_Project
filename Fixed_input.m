@@ -1,3 +1,5 @@
+% Interpolate to get same control input from the lower sample rate
+
 function [ control ] = Fixed_input(num, scale)
 
 load(['4SystemID_' num2str( num ) '.mat']);
