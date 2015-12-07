@@ -1,0 +1,13 @@
+function [ fk ] = Omega_est_grad_func( qk, qkk, wk, dt, fk )
+L_qkk = left_quat_mat(qkk);
+R_qk = right_quat_mat(qk);
+abk = [0 0 0 1] * L_qkk' * R_qk;
+ak = abk(1,1:3); bk = abk(4);
+v = [( sin(norm(wk)*dt/2)/norm(wk) ) * wk; cos(norm(wk)*dt/2)];
+
+grad_g = cos()
+
+fk = -(1 - abk*v)*;
+
+end
+

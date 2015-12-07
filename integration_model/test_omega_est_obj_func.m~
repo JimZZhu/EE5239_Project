@@ -1,8 +1,24 @@
 function test_omega_est_obj_func
 
+clear all;
+close all;
 
+
+%% True input output generator
+x_true = [-0.0591737260258116;-0.543246312713979;-0.0129308279058878];
+
+qk = [-0.0316853555968454;0.150461164599839;-0.0446661059595984;0.990442846983215];
+
+R_qk = right_quat_mat(qk);
+v = [( sin(norm(x_true)*dt/2)/norm(x_true) ) * x_true; cos(norm(x_true)*dt/2)];
+qkk = R_qk * v;
+y_opt = Omega_est_obj_func(qkk ,qk, x_true, 0.01)
+
+b = [0.001
+x0 = x_true - b - w;
+%% 
 fprintf(' ------ Steepest descent with Armijo rule step size -------\n');
-[iter, f1, x1, t1] = GradientDescent1(Q,b,x0);
+[iter, f1, x1, t1] = GradientDescent1(qkk, qk ,x0);
 fprintf('iteration: %d \n', iter);
 fprintf('distance from convergent point: %d \n', norm(x1(end) - x_opt));
 
@@ -13,39 +29,45 @@ title('Steepest descent with Armijo rule: Objective function');
 end
 
 % Finding Armijo stepsize
-function [m,x1] = ArmijoUpdate(sigma, beta, x0)
-    dx = dobj_func(Q,b,x0);  %%% <---- Change the gradient function right here
+function [m,x1] = ArmijoUpdate(sigma, beta, qkk, qk, x0, dt)
+    dx = Omega_est_grad_func(qkk,qk,x0, dt);  %%% <---- Change the gradient function right here
     m = 0;
     x1 = x0 - beta^m * dx;
     % dropping value bounded above by linear prediction
-    while(obj_func(Q,b,x0) - obj_func(Q,b,x1) <= sigma*beta^m*norm(dx)^2)        
+    while(Omega_est_obj_func(qkk, qk, x0, dt) - Omega_est_obj_func(qkk, qk, x1, dt) <= sigma*beta^m*norm(dx)^2)        
         m = m + 1;        
         x1 = x0 - beta^m * dx;
-        % fprintf('diff f: %f \n',f(Q,b,x0) - f(Q,b,x1)); 
+        % fprintf('diff f: %f \n',Omega_est_obj_func(qkk,qk,x0) - Omega_est_obj_func(qkk,qk,x1)); 
         % fprintf('size step: %f \n',sigma*beta^m*norm(dx)^2); 
     end
 end
 
 % Using steepest descent with Armijo rule
-function [iter, f_obj, x_1, time] = GradientDescent1(q_kk, q_k, x0)
+function [iter, f_obj, x_1, time] = GradientDescent1(q_kk, q_k, x0, dt)
+    
     sigma = 0.1; beta = 0.3;
     x_1 = zeros(length(x0), 100);
+    
     tic;
+    % initial value
     x_1(:,1) = x0;    
-    f_obj(1) = obj_func(q_kk, q_k ,x_1(:,1));
-    [~, x_1(:,2)] = ArmijoUpdate(sigma, beta, Q, b, x_1(:,1));
-    f_obj(2) = f(Q,b,x_1(:,2));
+    f_obj(1) = Omega_est_obj_func(q_kk, q_k ,x_1(:,1), dt);
+    
+    % first step
+    [~, x_1(:,2)] = ArmijoUpdate(sigma, beta, Q, b, x_1(:,1), dt);
+    f_obj(2) = Omega_est_obj_func(q_kk, q_k ,x_1(:,2), dt);
     iter = 1;
     time(iter) = toc;
+    
     while( norm(x_1(:,iter+1) - x_1(:,iter))/norm(x_1(:,iter)) > 0.01 ||...
-           abs(obj_func(q_kk, q_k, x_1(:,iter+1)) - obj_func(q_kk, q_k, x_1(:,iter)))/abs(obj_func(q_kk, q_k, x_1(:,iter))) > 1e-2 )        
+           abs(Omega_est_obj_func(q_kk, q_k, x_1(:,iter+1), dt) - Omega_est_obj_func(q_kk, q_k, x_1(:,iter), dt))/abs(Omega_est_obj_func(q_kk, q_k, x_1(:,iter), dt)) > 1e-2 )        
         tic;
         iter = iter + 1;
-        [~, x_1(:,iter+1)] = ArmijoUpdate(sigma, beta, q_kk, q_k, x_1(:,iter));
-        f_obj(iter+1) = obj_func(q_kk, q_k, x_1(:,iter+1));
+        [~, x_1(:,iter+1)] = ArmijoUpdate(sigma, beta, q_kk, q_k, x_1(:,iter), dt);
+        f_obj(iter+1) = Omega_est_obj_func(q_kk, q_k, x_1(:,iter+1), dt);
         time(iter) = toc;
         % fprintf('norm x: %f \n',norm(x_1(:,iter+1) - x_1(:,iter))/norm(x_1(:,iter)));
-        % fprintf('norm f: %f \n',abs(f(Q,b,x_1(:,iter+1)) - f(Q,b,x_1(:,iter)))/abs(f(Q,b,x_1(:,iter)))); 
-        % fprintf('f: %f \n',f(Q,b,x_1(:,iter+1))); 
+        % fprintf('norm f: %f \n',abs(Omega_est_obj_func(qkk,qk,x_1(:,iter+1)) - Omega_est_obj_func(qkk,qk,x_1(:,iter)))/abs(Omega_est_obj_func(qkk,qk,x_1(:,iter)))); 
+        % fprintf('f: %f \n',Omega_est_obj_func(qkk,qk,x_1(:,iter+1))); 
     end    
 end
