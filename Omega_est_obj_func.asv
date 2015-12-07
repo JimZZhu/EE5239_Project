@@ -1,0 +1,8 @@
+function [ fk ] = Omega_est_obj_func( qk, qkk, wk )
+L_qkk = left_quat_mat(qkk);
+R_qk = right_quat_mat(qk);
+abk = [0 0 0 1] * L_qkk' * R_qk;
+v = [wk/norm(wk)*sin]
+fk = 0.5*(1-)^2
+end
+

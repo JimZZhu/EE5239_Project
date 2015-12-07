@@ -12,8 +12,11 @@ load('4SystemID_1.mat');
 [v2,d2]  = eig(L2'*L2); 
 
 
+real_parameters(7:8,1) = real_parameters(7:8,1)*1e4;
+
+% With only Ix Iy Iz
 real_parameters = real_parameters([1:3,7:8],1);
-real_parameters(4:5,1) = real_parameters(4:5,1)*1e4;
+
 % Scaled with kt
 v1_real = v1(:,1)*real_parameters(end,1)/v1(end,1);
 v2_real = v2(:,1)*real_parameters(end,1)/v2(end,1);
