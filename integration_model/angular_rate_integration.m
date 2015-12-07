@@ -1,0 +1,1 @@
+function angular_rate_integration()
